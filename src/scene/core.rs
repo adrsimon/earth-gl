@@ -1,22 +1,23 @@
 use crate::algebra::{Mat4, Vec3};
 use crate::constants::{HEIGHT, WIDTH};
+use crate::scene::camera::{perspective, Camera};
+use crate::scene::light::Light;
 use crate::shaders::program::ShaderProgram;
 use crate::sphere::Sphere;
-use crate::scene::light::Light;
-use crate::scene::camera::{Camera, perspective};
 
 use std::f32::consts::PI;
 
 pub struct Scene {
     shader_program: ShaderProgram,
-    sphere: Sphere,
-    camera: Camera,
+    pub(crate) sphere: Sphere,
+    pub(crate) camera: Camera,
     light: Light,
 }
 
 impl Scene {
     pub fn new() -> Self {
-        let shader_program = ShaderProgram::new("src/shaders/shader.vert", "src/shaders/shader.frag");
+        let shader_program =
+            ShaderProgram::new("src/shaders/shader.vert", "src/shaders/shader.frag");
         let sphere = Sphere::new(0.5, 30, 30);
         let camera = Camera::new(
             Vec3::new(0.0, 0.0, 3.0),
@@ -55,7 +56,8 @@ impl Scene {
         self.shader_program.set_mat4("model", &model);
         self.shader_program.set_mat4("view", &view);
         self.shader_program.set_mat4("projection", &projection);
-        self.shader_program.set_vec3("viewPos", &self.camera.position);
+        self.shader_program
+            .set_vec3("viewPos", &self.camera.position);
 
         self.light.update_shader(&self.shader_program);
 

@@ -16,4 +16,3 @@ impl Light {
         shader.set_vec3("lightColor", &self.color);
     }
 }
-

@@ -1,6 +1,6 @@
+use crate::algebra::Vec3;
 use std::f32::consts::PI;
 use std::ptr;
-use crate::algebra::Vec3;
 
 pub struct Sphere {
     pub vao: gl::types::GLuint,
@@ -36,10 +36,24 @@ impl Sphere {
                 gl::STATIC_DRAW,
             );
 
-            gl::VertexAttribPointer(0, 3, gl::FLOAT, gl::FALSE, 6 * size_of::<gl::types::GLfloat>() as gl::types::GLsizei, ptr::null());
+            gl::VertexAttribPointer(
+                0,
+                3,
+                gl::FLOAT,
+                gl::FALSE,
+                6 * size_of::<gl::types::GLfloat>() as gl::types::GLsizei,
+                ptr::null(),
+            );
             gl::EnableVertexAttribArray(0);
 
-            gl::VertexAttribPointer(1, 3, gl::FLOAT, gl::FALSE, 6 * size_of::<gl::types::GLfloat>() as gl::types::GLsizei, (3 * size_of::<gl::types::GLfloat>()) as *const _);
+            gl::VertexAttribPointer(
+                1,
+                3,
+                gl::FLOAT,
+                gl::FALSE,
+                6 * size_of::<gl::types::GLfloat>() as gl::types::GLsizei,
+                (3 * size_of::<gl::types::GLfloat>()) as *const _,
+            );
             gl::EnableVertexAttribArray(1);
 
             (vao, vbo, ebo)
@@ -51,12 +65,34 @@ impl Sphere {
     pub fn draw(&self) {
         unsafe {
             gl::BindVertexArray(self.vao);
-            gl::DrawElements(gl::TRIANGLES, self.index_count as i32, gl::UNSIGNED_INT, ptr::null());
+            gl::DrawElements(
+                gl::TRIANGLES,
+                self.index_count as i32,
+                gl::UNSIGNED_INT,
+                ptr::null(),
+            );
+        }
+    }
+
+    pub fn toggle_wireframe(&self) {
+        unsafe {
+            let mut polygon_mode: gl::types::GLint = 0;
+            gl::GetIntegerv(gl::POLYGON_MODE, &mut polygon_mode);
+            let new_mode = if polygon_mode == gl::LINE as gl::types::GLint {
+                gl::FILL
+            } else {
+                gl::LINE
+            };
+            gl::PolygonMode(gl::FRONT_AND_BACK, new_mode);
         }
     }
 }
 
-pub fn generate_sphere_vertices(radius: f32, sectors: usize, stacks: usize) -> (Vec<f32>, Vec<u32>) {
+pub fn generate_sphere_vertices(
+    radius: f32,
+    sectors: usize,
+    stacks: usize,
+) -> (Vec<f32>, Vec<u32>) {
     let mut vertices = Vec::new();
     let mut indices = Vec::new();
 

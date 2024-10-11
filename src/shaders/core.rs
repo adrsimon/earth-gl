@@ -15,12 +15,19 @@ pub fn load_shader(path: &str, shader_type: gl::types::GLenum) -> gl::types::GLu
         gl::CompileShader(shader);
 
         let mut success = gl::FALSE as gl::types::GLint;
-        let mut info_log = Vec::with_capacity(512);
-        info_log.set_len(512 - 1);
+        let mut info_log = Vec::with_capacity(512 - 1);
         gl::GetShaderiv(shader, gl::COMPILE_STATUS, &mut success);
         if success != gl::TRUE as gl::types::GLint {
-            gl::GetShaderInfoLog(shader, 512, ptr::null_mut(), info_log.as_mut_ptr() as *mut gl::types::GLchar);
-            println!("ERROR::SHADER::COMPILATION_FAILED\n{}", String::from_utf8_lossy(&info_log));
+            gl::GetShaderInfoLog(
+                shader,
+                512,
+                ptr::null_mut(),
+                info_log.as_mut_ptr() as *mut gl::types::GLchar,
+            );
+            println!(
+                "ERROR::SHADER::COMPILATION_FAILED\n{}",
+                String::from_utf8_lossy(&info_log)
+            );
         }
 
         shader

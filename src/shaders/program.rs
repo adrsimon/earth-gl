@@ -1,7 +1,7 @@
-use std::ffi::CString;
-use std::ptr;
 use crate::algebra::{Mat4, Vec3};
 use crate::shaders::core::load_shader;
+use std::ffi::CString;
+use std::ptr;
 
 pub struct ShaderProgram {
     pub id: gl::types::GLuint,
@@ -19,12 +19,19 @@ impl ShaderProgram {
             gl::LinkProgram(shader_program);
 
             let mut success = gl::FALSE as gl::types::GLint;
-            let mut info_log = Vec::with_capacity(512);
-            info_log.set_len(512 - 1);
+            let mut info_log = Vec::with_capacity(512 - 1);
             gl::GetProgramiv(shader_program, gl::LINK_STATUS, &mut success);
             if success != gl::TRUE as gl::types::GLint {
-                gl::GetProgramInfoLog(shader_program, 512, ptr::null_mut(), info_log.as_mut_ptr() as *mut gl::types::GLchar);
-                println!("ERROR::SHADER::PROGRAM::LINKING_FAILED\n{}", String::from_utf8_lossy(&info_log));
+                gl::GetProgramInfoLog(
+                    shader_program,
+                    512,
+                    ptr::null_mut(),
+                    info_log.as_mut_ptr() as *mut gl::types::GLchar,
+                );
+                println!(
+                    "ERROR::SHADER::PROGRAM::LINKING_FAILED\n{}",
+                    String::from_utf8_lossy(&info_log)
+                );
             }
 
             gl::DeleteShader(vertex_shader);

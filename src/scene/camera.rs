@@ -8,7 +8,11 @@ pub struct Camera {
 
 impl Camera {
     pub fn new(position: Vec3, target: Vec3, up: Vec3) -> Self {
-        Camera { position, target, up }
+        Camera {
+            position,
+            target,
+            up,
+        }
     }
 
     pub fn get_view_matrix(&self) -> Mat4 {
@@ -27,11 +31,7 @@ pub fn perspective(fov_y: f32, aspect: f32, near: f32, far: f32) -> Mat4 {
 }
 
 pub fn look_at(eye: Vec3, center: Vec3, up: Vec3) -> Mat4 {
-    let f = Vec3::new(
-        center.x - eye.x,
-        center.y - eye.y,
-        center.z - eye.z,
-    ).normalize();
+    let f = Vec3::new(center.x - eye.x, center.y - eye.y, center.z - eye.z).normalize();
     let s = f.cross(&up).normalize();
     let u = s.cross(&f);
 
@@ -39,9 +39,11 @@ pub fn look_at(eye: Vec3, center: Vec3, up: Vec3) -> Mat4 {
         [s.x, u.x, -f.x, 0.0],
         [s.y, u.y, -f.y, 0.0],
         [s.z, u.z, -f.z, 0.0],
-        [-s.x * eye.x - s.y * eye.y - s.z * eye.z,
+        [
+            -s.x * eye.x - s.y * eye.y - s.z * eye.z,
             -u.x * eye.x - u.y * eye.y - u.z * eye.z,
             f.x * eye.x + f.y * eye.y + f.z * eye.z,
-            1.0],
+            1.0,
+        ],
     ])
 }
