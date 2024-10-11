@@ -1,4 +1,5 @@
-use crate::core::algebra::{Mat4, Vec3};
+use crate::algebra::mat4::Mat4;
+use crate::algebra::vec3::Vec3;
 use crate::core::constants::{HEIGHT, WIDTH};
 use crate::objects::objects::Object;
 use crate::scene::camera::{perspective, Camera};
@@ -21,9 +22,10 @@ impl Scene {
         let instances = Vec::new();
         let camera = Camera::new(
             Vec3::new(0.0, 0.0, 3.0),
-            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(0.0, 0.0, -1.0),
             Vec3::new(0.0, 1.0, 0.0),
         );
+
         let light = Light::new(Vec3::new(1.0, 1.0, 2.0), Vec3::new(1.0, 1.0, 1.0));
 
         Scene {
@@ -34,11 +36,8 @@ impl Scene {
         }
     }
 
-    pub fn update(&mut self, time: f64) {
-        let radius = 3.0;
-        let cam_x = radius * (time as f32 * 0.5).sin();
-        let cam_z = radius * (time as f32 * 0.5).cos();
-        self.camera.position = Vec3::new(cam_x, 0.0, cam_z);
+    pub fn update(&mut self, _time: f64) {
+        return;
     }
 
     pub fn render(&self) {
@@ -81,5 +80,9 @@ impl Scene {
             };
             gl::PolygonMode(gl::FRONT_AND_BACK, new_mode);
         }
+    }
+
+    pub fn pan_camera(&mut self, direction: Vec3) {
+        self.camera.pan(direction, self.camera.speed);
     }
 }

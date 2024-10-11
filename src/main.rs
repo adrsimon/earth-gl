@@ -1,13 +1,14 @@
 extern crate gl;
 extern crate glfw;
 
-use glfw::{Action, Context, Key};
+use glfw::{Action, Context, Key, WindowEvent};
 
 use crate::core::constants::{HEIGHT, WIDTH};
 use crate::objects::objects::Position;
 use crate::objects::sphere::{Sphere, SphereResolution};
 use crate::scene::core::Scene;
 
+mod algebra;
 mod core;
 mod objects;
 mod scene;
@@ -75,11 +76,27 @@ fn main() {
 
         for (_, event) in glfw::flush_messages(&events) {
             match event {
-                glfw::WindowEvent::Key(Key::Escape, _, Action::Press, _) => {
-                    window.set_should_close(true)
-                }
-                glfw::WindowEvent::Key(Key::Tab, _, Action::Press, _) => {
+                WindowEvent::Key(Key::Escape, _, Action::Press, _) => window.set_should_close(true),
+                WindowEvent::Key(Key::Tab, _, Action::Press, _) => {
                     scene.toggle_wireframe();
+                }
+                WindowEvent::Key(Key::W, _, Action::Press | Action::Repeat, _) => {
+                    scene.pan_camera(scene.camera.front);
+                }
+                WindowEvent::Key(Key::S, _, Action::Press | Action::Repeat, _) => {
+                    scene.pan_camera(-scene.camera.front);
+                }
+                WindowEvent::Key(Key::A, _, Action::Press | Action::Repeat, _) => {
+                    scene.pan_camera(-scene.camera.right);
+                }
+                WindowEvent::Key(Key::D, _, Action::Press | Action::Repeat, _) => {
+                    scene.pan_camera(scene.camera.right);
+                }
+                WindowEvent::Key(Key::Q, _, Action::Press | Action::Repeat, _) => {
+                    scene.pan_camera(scene.camera.up);
+                }
+                WindowEvent::Key(Key::E, _, Action::Press | Action::Repeat, _) => {
+                    scene.pan_camera(-scene.camera.up);
                 }
                 _ => {}
             }

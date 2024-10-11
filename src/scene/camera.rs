@@ -1,22 +1,41 @@
-use crate::core::algebra::{Mat4, Vec3};
+use crate::algebra::mat4::Mat4;
+use crate::algebra::vec3::Vec3;
 
 pub struct Camera {
     pub position: Vec3,
-    pub target: Vec3,
     pub up: Vec3,
+    pub front: Vec3,
+    pub right: Vec3,
+    pub world_up: Vec3,
+    pub speed: f32,
 }
 
 impl Camera {
-    pub fn new(position: Vec3, target: Vec3, up: Vec3) -> Self {
+    pub fn new(position: Vec3, front: Vec3, world_up: Vec3) -> Self {
+        let right = front.cross(&world_up).normalize();
+        let up = right.cross(&front).normalize();
+
         Camera {
             position,
-            target,
+            front,
             up,
+            right,
+            world_up,
+            speed: 0.2,
         }
     }
 
     pub fn get_view_matrix(&self) -> Mat4 {
-        look_at(self.position, self.target, self.up)
+        look_at(self.position, self.position + self.front, self.up)
+    }
+
+    pub fn pan(&mut self, direction: Vec3, speed: f32) {
+        self.position += direction * speed;
+    }
+
+    pub fn update_camera_vectors(&mut self) {
+        self.right = self.front.cross(&self.world_up).normalize();
+        self.up = self.right.cross(&self.front).normalize();
     }
 }
 

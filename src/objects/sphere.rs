@@ -1,4 +1,4 @@
-use crate::core::algebra::Vec3;
+use crate::algebra::vec3::Vec3;
 use crate::objects::objects::{Object, Position};
 
 use std::f32::consts::PI;
