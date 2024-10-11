@@ -1,4 +1,6 @@
 use crate::core::algebra::Vec3;
+use crate::objects::objects::{Object, Position};
+
 use std::f32::consts::PI;
 use std::ptr;
 
@@ -7,9 +9,15 @@ pub struct Sphere {
     pub index_count: usize,
 }
 
+pub struct SphereResolution {
+    pub sectors: usize,
+    pub stacks: usize,
+}
+
 impl Sphere {
-    pub fn new(radius: f32, sectors: usize, stacks: usize) -> Self {
-        let (vertices, indices) = generate_sphere_vertices(radius, sectors, stacks);
+    pub fn new(radius: f32, position: Position, res: SphereResolution) -> Self {
+        let (vertices, indices) =
+            generate_sphere_vertices(radius, position, res.sectors, res.stacks);
         let index_count = indices.len();
 
         let (vao, _vbo, _ebo) = unsafe {
@@ -61,8 +69,10 @@ impl Sphere {
 
         Sphere { vao, index_count }
     }
+}
 
-    pub fn draw(&self) {
+impl Object for Sphere {
+    fn draw(&self) {
         unsafe {
             gl::BindVertexArray(self.vao);
             gl::DrawElements(
@@ -73,23 +83,11 @@ impl Sphere {
             );
         }
     }
-
-    pub fn toggle_wireframe(&self) {
-        unsafe {
-            let mut polygon_mode: gl::types::GLint = 0;
-            gl::GetIntegerv(gl::POLYGON_MODE, &mut polygon_mode);
-            let new_mode = if polygon_mode == gl::LINE as gl::types::GLint {
-                gl::FILL
-            } else {
-                gl::LINE
-            };
-            gl::PolygonMode(gl::FRONT_AND_BACK, new_mode);
-        }
-    }
 }
 
 pub fn generate_sphere_vertices(
     radius: f32,
+    position: Position,
     sectors: usize,
     stacks: usize,
 ) -> (Vec<f32>, Vec<u32>) {
@@ -109,9 +107,9 @@ pub fn generate_sphere_vertices(
             let x = xy * sector_angle.cos();
             let y = xy * sector_angle.sin();
 
-            vertices.push(x);
-            vertices.push(y);
-            vertices.push(z);
+            vertices.push(x + position.x);
+            vertices.push(y + position.y);
+            vertices.push(z + position.z);
 
             let normal = Vec3::new(x, y, z).normalize();
             vertices.push(normal.x);

@@ -4,6 +4,8 @@ extern crate glfw;
 use glfw::{Action, Context, Key};
 
 use crate::core::constants::{HEIGHT, WIDTH};
+use crate::objects::objects::Position;
+use crate::objects::sphere::{Sphere, SphereResolution};
 use crate::scene::core::Scene;
 
 mod core;
@@ -36,6 +38,31 @@ fn main() {
     }
 
     let mut scene = Scene::new();
+    scene.push_instance(Sphere::new(
+        1.0,
+        Position {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        },
+        SphereResolution {
+            sectors: 64,
+            stacks: 64,
+        },
+    ));
+
+    scene.push_instance(Sphere::new(
+        0.5,
+        Position {
+            x: 1.0,
+            y: 1.0,
+            z: 1.0,
+        },
+        SphereResolution {
+            sectors: 64,
+            stacks: 64,
+        },
+    ));
 
     while !window.should_close() {
         let current_time = glfw.get_time();
@@ -52,7 +79,7 @@ fn main() {
                     window.set_should_close(true)
                 }
                 glfw::WindowEvent::Key(Key::Tab, _, Action::Press, _) => {
-                    scene.sphere.toggle_wireframe()
+                    scene.toggle_wireframe();
                 }
                 _ => {}
             }

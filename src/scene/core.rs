@@ -1,6 +1,6 @@
 use crate::core::algebra::{Mat4, Vec3};
 use crate::core::constants::{HEIGHT, WIDTH};
-use crate::objects::sphere::Sphere;
+use crate::objects::objects::Object;
 use crate::scene::camera::{perspective, Camera};
 use crate::scene::light::Light;
 use crate::shaders::program::ShaderProgram;
@@ -9,7 +9,7 @@ use std::f32::consts::PI;
 
 pub struct Scene {
     shader_program: ShaderProgram,
-    pub sphere: Sphere,
+    pub instances: Vec<Box<dyn Object>>,
     pub camera: Camera,
     light: Light,
 }
@@ -18,7 +18,7 @@ impl Scene {
     pub fn new() -> Self {
         let shader_program =
             ShaderProgram::new("src/shaders/shader.vert", "src/shaders/shader.frag");
-        let sphere = Sphere::new(0.5, 30, 30);
+        let instances = Vec::new();
         let camera = Camera::new(
             Vec3::new(0.0, 0.0, 3.0),
             Vec3::new(0.0, 0.0, 0.0),
@@ -28,7 +28,7 @@ impl Scene {
 
         Scene {
             shader_program,
-            sphere,
+            instances,
             camera,
             light,
         }
@@ -61,6 +61,25 @@ impl Scene {
 
         self.light.update_shader(&self.shader_program);
 
-        self.sphere.draw();
+        for instance in self.instances.iter() {
+            instance.draw();
+        }
+    }
+
+    pub fn push_instance(&mut self, instance: impl Object + 'static) {
+        self.instances.push(Box::new(instance));
+    }
+
+    pub fn toggle_wireframe(&mut self) {
+        unsafe {
+            let mut polygon_mode: gl::types::GLint = 0;
+            gl::GetIntegerv(gl::POLYGON_MODE, &mut polygon_mode);
+            let new_mode = if polygon_mode == gl::LINE as gl::types::GLint {
+                gl::FILL
+            } else {
+                gl::LINE
+            };
+            gl::PolygonMode(gl::FRONT_AND_BACK, new_mode);
+        }
     }
 }
