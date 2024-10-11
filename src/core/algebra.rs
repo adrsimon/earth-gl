@@ -48,19 +48,6 @@ impl Mat4 {
         Mat4 { data }
     }
 
-    pub fn multiply(&self, other: &Mat4) -> Mat4 {
-        let mut result = Mat4::identity();
-        for i in 0..4 {
-            for j in 0..4 {
-                result.data[i][j] = self.data[i][0] * other.data[0][j]
-                    + self.data[i][1] * other.data[1][j]
-                    + self.data[i][2] * other.data[2][j]
-                    + self.data[i][3] * other.data[3][j];
-            }
-        }
-        result
-    }
-
     pub fn as_ptr(&self) -> *const f32 {
         self.data.as_ptr() as *const f32
     }

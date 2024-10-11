@@ -1,4 +1,4 @@
-use crate::algebra::{Mat4, Vec3};
+use crate::core::algebra::{Mat4, Vec3};
 use crate::shaders::core::load_shader;
 use std::ffi::CString;
 use std::ptr;

@@ -3,14 +3,13 @@ extern crate glfw;
 
 use glfw::{Action, Context, Key};
 
-use crate::constants::{HEIGHT, WIDTH};
+use crate::core::constants::{HEIGHT, WIDTH};
 use crate::scene::core::Scene;
 
-mod algebra;
-mod constants;
+mod core;
+mod objects;
 mod scene;
 mod shaders;
-mod sphere;
 
 fn main() {
     use glfw::fail_on_errors;

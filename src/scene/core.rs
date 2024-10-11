@@ -1,16 +1,16 @@
-use crate::algebra::{Mat4, Vec3};
-use crate::constants::{HEIGHT, WIDTH};
+use crate::core::algebra::{Mat4, Vec3};
+use crate::core::constants::{HEIGHT, WIDTH};
+use crate::objects::sphere::Sphere;
 use crate::scene::camera::{perspective, Camera};
 use crate::scene::light::Light;
 use crate::shaders::program::ShaderProgram;
-use crate::sphere::Sphere;
 
 use std::f32::consts::PI;
 
 pub struct Scene {
     shader_program: ShaderProgram,
-    pub(crate) sphere: Sphere,
-    pub(crate) camera: Camera,
+    pub sphere: Sphere,
+    pub camera: Camera,
     light: Light,
 }
 

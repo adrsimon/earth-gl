@@ -1,4 +1,4 @@
-use crate::algebra::Vec3;
+use crate::core::algebra::Vec3;
 use std::f32::consts::PI;
 use std::ptr;
 
