@@ -1,11 +1,12 @@
 extern crate gl;
 extern crate glfw;
 
-use glfw::{Action, Context, Key, WindowEvent};
+use glfw::{Action, Context, Key, MouseButton, WindowEvent};
 
 use crate::core::constants::{HEIGHT, WIDTH};
 use crate::objects::objects::Position;
 use crate::objects::sphere::{Sphere, SphereResolution};
+use crate::scene::camera::CameraMovement;
 use crate::scene::core::Scene;
 
 mod algebra;
@@ -13,6 +14,9 @@ mod core;
 mod objects;
 mod scene;
 mod shaders;
+
+use std::fs::OpenOptions;
+use std::io::Write;
 
 fn main() {
     use glfw::fail_on_errors;
@@ -31,6 +35,8 @@ fn main() {
 
     window.make_current();
     window.set_key_polling(true);
+    window.set_cursor_pos_polling(true);
+    window.set_mouse_button_polling(true);
 
     gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
 
@@ -65,10 +71,18 @@ fn main() {
         },
     ));
 
+    let mut last_frame_time = glfw.get_time();
+    let mut last_x = window.get_size().0 as f32 / 2.0;
+    let mut last_y = window.get_size().1 as f32 / 2.0;
+    let mut first_mouse = true;
+    let mut right_mouse_pressed = false;
+
     while !window.should_close() {
         let current_time = glfw.get_time();
+        let delta_time = (current_time - last_frame_time) as f32;
+        last_frame_time = current_time;
 
-        scene.update(current_time);
+        scene.update(delta_time);
         scene.render();
 
         window.swap_buffers();
@@ -80,23 +94,56 @@ fn main() {
                 WindowEvent::Key(Key::Tab, _, Action::Press, _) => {
                     scene.toggle_wireframe();
                 }
-                WindowEvent::Key(Key::W, _, Action::Press | Action::Repeat, _) => {
-                    scene.pan_camera(scene.camera.front);
+                WindowEvent::Key(Key::W, _, Action::Press, _) => {
+                    scene.process_keyboard(CameraMovement::Forward, true);
                 }
-                WindowEvent::Key(Key::S, _, Action::Press | Action::Repeat, _) => {
-                    scene.pan_camera(-scene.camera.front);
+                WindowEvent::Key(Key::W, _, Action::Release, _) => {
+                    scene.process_keyboard(CameraMovement::Forward, false);
                 }
-                WindowEvent::Key(Key::A, _, Action::Press | Action::Repeat, _) => {
-                    scene.pan_camera(-scene.camera.right);
+                WindowEvent::Key(Key::S, _, Action::Press, _) => {
+                    scene.process_keyboard(CameraMovement::Backward, true);
                 }
-                WindowEvent::Key(Key::D, _, Action::Press | Action::Repeat, _) => {
-                    scene.pan_camera(scene.camera.right);
+                WindowEvent::Key(Key::S, _, Action::Release, _) => {
+                    scene.process_keyboard(CameraMovement::Backward, false);
                 }
-                WindowEvent::Key(Key::Q, _, Action::Press | Action::Repeat, _) => {
-                    scene.pan_camera(scene.camera.up);
+                WindowEvent::Key(Key::A, _, Action::Press, _) => {
+                    scene.process_keyboard(CameraMovement::Left, true);
                 }
-                WindowEvent::Key(Key::E, _, Action::Press | Action::Repeat, _) => {
-                    scene.pan_camera(-scene.camera.up);
+                WindowEvent::Key(Key::A, _, Action::Release, _) => {
+                    scene.process_keyboard(CameraMovement::Left, false);
+                }
+                WindowEvent::Key(Key::D, _, Action::Press, _) => {
+                    scene.process_keyboard(CameraMovement::Right, true);
+                }
+                WindowEvent::Key(Key::D, _, Action::Release, _) => {
+                    scene.process_keyboard(CameraMovement::Right, false);
+                }
+                WindowEvent::MouseButton(MouseButton::Button2, Action::Press, _) => {
+                    right_mouse_pressed = true;
+                    first_mouse = true;
+                }
+                WindowEvent::MouseButton(MouseButton::Button2, Action::Release, _) => {
+                    right_mouse_pressed = false;
+                }
+                WindowEvent::CursorPos(x_pos, y_pos) => {
+                    let x_pos = x_pos as f32;
+                    let y_pos = y_pos as f32;
+
+                    if right_mouse_pressed {
+                        if first_mouse {
+                            last_x = x_pos;
+                            last_y = y_pos;
+                            first_mouse = false;
+                        } else {
+                            let x_offset = x_pos - last_x;
+                            let y_offset = y_pos - last_y;
+
+                            scene.process_mouse_movement(x_offset, y_offset);
+                        }
+
+                        last_x = x_pos;
+                        last_y = y_pos;
+                    }
                 }
                 _ => {}
             }

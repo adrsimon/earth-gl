@@ -2,7 +2,7 @@ use crate::algebra::mat4::Mat4;
 use crate::algebra::vec3::Vec3;
 use crate::core::constants::{HEIGHT, WIDTH};
 use crate::objects::objects::Object;
-use crate::scene::camera::{perspective, Camera};
+use crate::scene::camera::{perspective, Camera, CameraMovement};
 use crate::scene::light::Light;
 use crate::shaders::program::ShaderProgram;
 
@@ -20,11 +20,7 @@ impl Scene {
         let shader_program =
             ShaderProgram::new("src/shaders/shader.vert", "src/shaders/shader.frag");
         let instances = Vec::new();
-        let camera = Camera::new(
-            Vec3::new(0.0, 0.0, 3.0),
-            Vec3::new(0.0, 0.0, -1.0),
-            Vec3::new(0.0, 1.0, 0.0),
-        );
+        let camera = Camera::new(Vec3::new(0.0, 0.0, 3.0), Vec3::new(0.0, 1.0, 0.0));
 
         let light = Light::new(Vec3::new(1.0, 1.0, 2.0), Vec3::new(1.0, 1.0, 1.0));
 
@@ -36,8 +32,8 @@ impl Scene {
         }
     }
 
-    pub fn update(&mut self, _time: f64) {
-        return;
+    pub fn update(&mut self, delta_time: f32) {
+        self.camera.update(delta_time);
     }
 
     pub fn render(&self) {
@@ -82,7 +78,11 @@ impl Scene {
         }
     }
 
-    pub fn pan_camera(&mut self, direction: Vec3) {
-        self.camera.pan(direction, self.camera.speed);
+    pub fn process_keyboard(&mut self, direction: CameraMovement, pressed: bool) {
+        self.camera.process_keyboard(direction, pressed);
+    }
+
+    pub fn process_mouse_movement(&mut self, x_offset: f32, y_offset: f32) {
+        self.camera.process_mouse_movement(x_offset, y_offset, true);
     }
 }

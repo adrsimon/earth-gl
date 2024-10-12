@@ -1,39 +1,84 @@
 use crate::algebra::mat4::Mat4;
 use crate::algebra::vec3::Vec3;
 
+pub enum CameraMovement {
+    Forward,
+    Backward,
+    Left,
+    Right,
+}
+
 pub struct Camera {
     pub position: Vec3,
-    pub up: Vec3,
     pub front: Vec3,
+    pub up: Vec3,
     pub right: Vec3,
     pub world_up: Vec3,
-    pub speed: f32,
+    pub yaw: f32,
+    pub pitch: f32,
+    pub movement_speed: f32,
+    pub mouse_sensitivity: f32,
+    pub velocity: Vec3,
 }
 
 impl Camera {
-    pub fn new(position: Vec3, front: Vec3, world_up: Vec3) -> Self {
-        let right = front.cross(&world_up).normalize();
-        let up = right.cross(&front).normalize();
-
-        Camera {
+    pub fn new(position: Vec3, world_up: Vec3) -> Self {
+        let mut camera = Camera {
             position,
-            front,
-            up,
-            right,
+            front: Vec3::new(0.0, 0.0, -1.0),
+            up: Vec3::new(0.0, 1.0, 0.0),
+            right: Vec3::new(1.0, 0.0, 0.0),
             world_up,
-            speed: 0.2,
-        }
+            yaw: -90.0,
+            pitch: 0.0,
+            movement_speed: 2.0,
+            mouse_sensitivity: 0.1,
+            velocity: Vec3::new(0.0, 0.0, 0.0),
+        };
+        camera.update_camera_vectors();
+        camera
     }
 
     pub fn get_view_matrix(&self) -> Mat4 {
         look_at(self.position, self.position + self.front, self.up)
     }
 
-    pub fn pan(&mut self, direction: Vec3, speed: f32) {
-        self.position += direction * speed;
+    pub fn process_keyboard(&mut self, direction: CameraMovement, pressed: bool) {
+        let speed = if pressed { self.movement_speed } else { 0.0 };
+        match direction {
+            CameraMovement::Forward => self.velocity.z = speed,
+            CameraMovement::Backward => self.velocity.z = -speed,
+            CameraMovement::Left => self.velocity.x = -speed,
+            CameraMovement::Right => self.velocity.x = speed,
+        }
     }
 
-    pub fn update_camera_vectors(&mut self) {
+    pub fn update(&mut self, delta_time: f32) {
+        self.position += self.front * self.velocity.z * delta_time;
+        self.position += self.right * self.velocity.x * delta_time;
+    }
+
+    pub fn process_mouse_movement(&mut self, x_offset: f32, y_offset: f32, constrain_pitch: bool) {
+        let x_offset = x_offset * self.mouse_sensitivity;
+        let y_offset = y_offset * self.mouse_sensitivity;
+
+        self.yaw += x_offset;
+        self.pitch -= y_offset;
+
+        if constrain_pitch {
+            self.pitch = self.pitch.clamp(-89.0, 89.0);
+        }
+
+        self.update_camera_vectors();
+    }
+
+    fn update_camera_vectors(&mut self) {
+        let front = Vec3::new(
+            self.yaw.to_radians().cos() * self.pitch.to_radians().cos(),
+            self.pitch.to_radians().sin(),
+            self.yaw.to_radians().sin() * self.pitch.to_radians().cos(),
+        );
+        self.front = front.normalize();
         self.right = self.front.cross(&self.world_up).normalize();
         self.up = self.right.cross(&self.front).normalize();
     }
